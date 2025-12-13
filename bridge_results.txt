@@ -1,0 +1,386 @@
+// ./venv/bin/python main.py --verbose --save-plots
+
+
+======================================================================
+  BRÜCKENSIMULATION - GRENZZUSTAND DER TRAGFÄHIGKEIT
+  Velobrücke Zürich (Maturaarbeit)
+======================================================================
+
+[1/5] Geometrie initialisieren...
+============================================================
+BRÜCKENGEOMETRIE - Zusammenfassung
+============================================================
+
+Gesamtlänge:        175.0 m
+Anzahl Felder:      6
+Anzahl Auflager:    7
+
+Feldweiten [m]:
+  Feld 1: 21.0 m
+  Feld 2: 30.0 m
+  Feld 3: 40.0 m
+  Feld 4: 33.0 m
+  Feld 5: 30.0 m
+  Feld 6: 21.0 m
+
+Auflagerpositionen [m]: [0.0, 21.0, 51.0, 91.0, 124.0, 154.0, 175.0]
+
+Querschnitt (Stahl-Trapez-Hohlkasten):
+  Breite oben b1:   6.00 m
+  Breite unten b3:  3.00 m
+  Höhe h2:          1.50 m
+  Wandstärke:       0.10 m
+
+  Fläche A:         1.1600 m²
+  Trägheitsmoment I:12.6562 m⁴
+  Widerstandsmoment:15.1875 m³ -> TODO: plausibilisieren
+  Schubfläche A_V:  0.3970 m² -> TODO: plausibilisieren
+============================================================
+[2/5] Materialien laden...
+============================================================
+MATERIALEIGENSCHAFTEN
+============================================================
+
+Stahl S355 (Überbau):
+  E-Modul:          210,000 MPa
+  Schubmodul G:     81,000 MPa.  --> TODO: überprüfen ob Claude stimmt (siehe unten)
+  Streckgrenze f_yk:355 MPa
+  Bemessungswert f_yd: 355 MPa
+  Dichte:           7,900 kg/m³
+  Wichte:           77.50 kN/m³
+  α_T:              1.20e-05 1/K
+
+Beton C30/37 (Pfeiler/Widerlager):
+  E-Modul:          33,000 MPa
+  f_ck:             30 MPa
+  f_cd:             17.0 MPa
+  Dichte:           2,200 kg/m³
+  Wichte:           21.58 kN/m³
+============================================================
+[3/5] Lasten berechnen...
+============================================================
+LASTDEFINITIONEN
+============================================================
+
+--- Ständige Lasten (Kapitel 3.1.2) ---
+  Eigengewicht:     14.98 kN/m².  ->  ---> 7.06, ist aber mit dem alten Querfläche gerechnet, musss in der Matuararbeit noch aktualisert werden
+                    89.90 kN/m (Streckenlast)
+  Belag:            0.25 kN/m²
+  Gesamt ständig:   91.40 kN/m
+
+--- Verkehrslasten (Kapitel 3.1.1) ---
+  Feld L=21m:     4.35 kN/m²
+  Feld L=30m:     4.00 kN/m²
+  Feld L=40m:     3.71 kN/m²
+  Feld L=33m:     3.90 kN/m²
+  Feld L=30m:     4.00 kN/m²
+  Feld L=21m:     4.35 kN/m²
+  Streckenlast:     22.29 kN/m
+  Einzellast:       10.0 kN
+
+--- Windlasten (Kapitel 3.2.1) ---
+  Mit Verkehr:      0.783 N/m²
+  Ohne Verkehr:     0.950 N/m²
+  Angriffsfläche:   472.5 m²
+  Windkraft:        0.4 kN
+
+--- Temperatur (Kapitel 3.2.2) ---
+  T_min:            -26°C
+  T_max:            51°C
+  ΔT_N:             77 K
+  Δl:               161.7 mm
+============================================================
+======================================================================
+LASTFALLKOMBINATIONEN - Grenzzustand der Tragfähigkeit (ULS)
+======================================================================
+
+Teilsicherheitsbeiwerte γ:
+  γ_G,sup = 1.35 (ständig, ungünstig)
+  γ_G,inf = 1.00 (ständig, günstig)
+  γ_Q,sup = 1.50 (veränderlich, ungünstig)
+
+Kombinationsbeiwerte Ψ_0:
+  Ψ_0,Verkehr = 0.40
+  Ψ_0,Wind    = 0.30
+  Ψ_0,Temp    = 0.80
+
+----------------------------------------------------------------------
+Lastfallkombinationen:
+----------------------------------------------------------------------
+
+LC1: Eigengewicht + Verkehr (Leiteinwirkung)
+  E_d = 1.35·G + 1.35·G_s + 1.50·Q_T + 0.45·Q_W + 1.20·Q_Temp
+
+LC2: Eigengewicht + Wind (Leiteinwirkung)
+  E_d = 1.35·G + 1.35·G_s + 0.60·Q_T + 1.50·Q_W + 1.20·Q_Temp
+
+LC3: Eigengewicht + Temperatur (Leiteinwirkung)
+  E_d = 1.35·G + 1.35·G_s + 0.60·Q_T + 0.45·Q_W + 1.50·Q_Temp
+
+LC4: Nur Eigengewicht (minimal)
+  E_d = 1.00·G + 1.00·G_s
+
+LC5: Maximale vertikale Last (konservativ)
+  E_d = 1.35·G + 1.35·G_s + 1.50·Q_T
+
+======================================================================
+Formel aus Maturaarbeit S. 23-24:
+E_d = Σ γ_Gj·G_kj + γ_Q1·Q_k1 + Σ γ_Qi·Ψ_0i·Q_ki
+======================================================================
+[4/5] FEM-Modell erstellen und analysieren...
+Starte Analyse...
+Analyse abgeschlossen.
+      Analyse erfolgreich abgeschlossen.
+[5/5] Ergebnisse auswerten...
+
+
+======================================================================
+GRENZZUSTAND DER TRAGFÄHIGKEIT - LC1
+======================================================================
+
+--- Bemessungswiderstände R_d (Maturaarbeit S. 24) ---
+  N_Rd = 411,800 kN
+  M_Rd = 5,391,562 kNm
+  V_Rd = 81,367 kN
+
+--- Nachweise ---
+
+Normalkraft N_Ed ≤ N_Rd:
+  E_d = 0.00 kN bei x = 0.0 m
+  R_d = 411800.00 kN
+  η = 0.0% -> OK
+
+Biegemoment M_Ed ≤ M_Rd:
+  E_d = 19118.65 kNm bei x = 91.0 m
+  R_d = 5391562.50 kNm
+  η = 0.4% -> OK
+
+Querkraft V_Ed ≤ V_Rd:
+  E_d = 3159.82 kN bei x = 91.0 m
+  R_d = 81366.54 kN
+  η = 3.9% -> OK
+
+======================================================================
+ERGEBNIS: Alle Nachweise erfüllt!
+======================================================================
+
+----------------------------------------------------------------------
+MASSGEBENDE LASTFALLKOMBINATION:
+  LC1 - Querkraft
+  Maximaler Ausnutzungsgrad: η = 3.9%
+----------------------------------------------------------------------
+
+AUFLAGERKRÄFTE:
+  Auflager_1 (x = 0.0 m):
+    Ry = 1237.52 kN (vertikal)
+  Auflager_2 (x = 21.0 m):
+    Ry = 4088.25 kN (vertikal)
+  Auflager_3 (x = 51.0 m):
+    Ry = 5784.76 kN (vertikal)
+  Auflager_4 (x = 91.0 m):
+    Ry = 5959.85 kN (vertikal)
+  Auflager_5 (x = 124.0 m):
+    Ry = 4784.77 kN (vertikal)
+  Auflager_6 (x = 154.0 m):
+    Ry = 4435.39 kN (vertikal)
+  Auflager_7 (x = 175.0 m):
+    Ry = 1152.44 kN (vertikal)
+
+Erstelle Diagramme...
+Diagramm gespeichert: schnittgroessen.png
+
+
+
+
+
+  Widerstandsmoment:15.1875 m³.   
+  Schubfläche A_V:  0.3970 m².    -
+============================================================
+[2/5] Materialien laden...
+============================================================
+MATERIALEIGENSCHAFTEN
+============================================================
+
+Stahl S355 (Überbau):              
+  E-Modul:          210,000 MPa
+  Schubmodul G:     81,000 MPa.     --> TODO: überprüfen ob Claude stimmt (siehe unten)
+  Streckgrenze f_yk:355 MPa
+  Bemessungswert f_yd: 355 MPa
+  Dichte:           7,900 kg/m³
+  Wichte:           77.50 kN/m³
+  α_T:              1.20e-05 1/K
+
+Beton C30/37 (Pfeiler/Widerlager):
+  E-Modul:          33,000 MPa
+  f_ck:             30 MPa
+  f_cd:             20.0 MPa
+  Dichte:           2,200 kg/m³
+  Wichte:           21.58 kN/m³
+============================================================
+[3/5] Lasten berechnen...
+============================================================
+LASTDEFINITIONEN
+============================================================
+
+--- Ständige Lasten (Kapitel 3.1.2) ---
+  Eigengewicht:     14.98 kN/m²             ---> 7.06, ist aber mit dem alten Wert gerechnet
+                    89.90 kN/m (Streckenlast)
+  Belag:            0.25 kN/m²
+  Gesamt ständig:   91.40 kN/m
+
+--- Verkehrslasten (Kapitel 3.1.1) ---
+  Feld L=21m:     4.35 kN/m²
+  Feld L=30m:     4.00 kN/m²
+  Feld L=40m:     3.71 kN/m²
+  Feld L=33m:     3.90 kN/m²
+  Feld L=30m:     4.00 kN/m²
+  Feld L=21m:     4.35 kN/m²
+  Streckenlast:     22.29 kN/m
+  Einzellast:       10.0 kN
+
+--- Windlasten (Kapitel 3.2.1) ---
+  Mit Verkehr:      0.783 N/m²
+  Ohne Verkehr:     0.950 N/m²
+  Angriffsfläche:   472.5 m²
+  Windkraft:        0.4 kN
+
+--- Temperatur (Kapitel 3.2.2) ---
+  T_min:            -26°C
+  T_max:            51°C
+  ΔT_N:             77 K
+  Δl:               161.7 mm
+============================================================
+======================================================================
+LASTFALLKOMBINATIONEN - Grenzzustand der Tragfähigkeit (ULS)
+======================================================================
+
+Teilsicherheitsbeiwerte γ:
+  γ_G,sup = 1.35 (ständig, ungünstig)
+  γ_G,inf = 1.00 (ständig, günstig)
+  γ_Q,sup = 1.50 (veränderlich, ungünstig)
+
+Kombinationsbeiwerte Ψ_0:
+  Ψ_0,Verkehr = 0.40
+  Ψ_0,Wind    = 0.30
+  Ψ_0,Temp    = 0.80
+
+----------------------------------------------------------------------
+Lastfallkombinationen:
+----------------------------------------------------------------------
+
+LC1: Eigengewicht + Verkehr (Leiteinwirkung)
+  E_d = 1.35·G + 1.35·G_s + 1.50·Q_T + 0.45·Q_W + 1.20·Q_Temp
+
+LC2: Eigengewicht + Wind (Leiteinwirkung)
+  E_d = 1.35·G + 1.35·G_s + 0.60·Q_T + 1.50·Q_W + 1.20·Q_Temp
+
+LC3: Eigengewicht + Temperatur (Leiteinwirkung)
+  E_d = 1.35·G + 1.35·G_s + 0.60·Q_T + 0.45·Q_W + 1.50·Q_Temp
+
+LC4: Nur Eigengewicht (minimal)
+  E_d = 1.00·G + 1.00·G_s
+
+LC5: Maximale vertikale Last (konservativ)
+  E_d = 1.35·G + 1.35·G_s + 1.50·Q_T
+
+======================================================================
+Formel aus Maturaarbeit S. 23-24:
+E_d = Σ γ_Gj·G_kj + γ_Q1·Q_k1 + Σ γ_Qi·Ψ_0i·Q_ki
+======================================================================
+[4/5] FEM-Modell erstellen und analysieren...
+Starte Analyse...
+Analyse abgeschlossen.
+      Analyse erfolgreich abgeschlossen.
+[5/5] Ergebnisse auswerten...
+
+
+======================================================================
+GRENZZUSTAND DER TRAGFÄHIGKEIT - LC1
+======================================================================
+
+--- Bemessungswiderstände R_d (Maturaarbeit S. 24) ---
+  N_Rd = 411,800 kN
+  M_Rd = 5,391,562 kNm
+  V_Rd = 81,367 kN
+
+--- Nachweise ---
+
+Normalkraft N_Ed ≤ N_Rd:
+  E_d = 0.00 kN bei x = 0.0 m
+  R_d = 411800.00 kN
+  η = 0.0% -> OK
+
+Biegemoment M_Ed ≤ M_Rd:
+  E_d = 19118.65 kNm bei x = 91.0 m
+  R_d = 5391562.50 kNm
+  η = 0.4% -> OK
+
+Querkraft V_Ed ≤ V_Rd:
+  E_d = 3159.82 kN bei x = 91.0 m
+  R_d = 81366.54 kN
+  η = 3.9% -> OK
+
+======================================================================
+ERGEBNIS: Alle Nachweise erfüllt!
+======================================================================
+
+----------------------------------------------------------------------
+MASSGEBENDE LASTFALLKOMBINATION:
+  LC1 - Querkraft
+  Maximaler Ausnutzungsgrad: η = 3.9%
+----------------------------------------------------------------------
+
+AUFLAGERKRÄFTE:
+  Auflager_1 (x = 0.0 m):
+    Ry = 1237.52 kN (vertikal)
+  Auflager_2 (x = 21.0 m):
+    Ry = 4088.25 kN (vertikal)
+  Auflager_3 (x = 51.0 m):
+    Ry = 5784.76 kN (vertikal)
+  Auflager_4 (x = 91.0 m):
+    Ry = 5959.85 kN (vertikal)
+  Auflager_5 (x = 124.0 m):
+    Ry = 4784.77 kN (vertikal)
+  Auflager_6 (x = 154.0 m):
+    Ry = 4435.39 kN (vertikal)
+  Auflager_7 (x = 175.0 m):
+    Ry = 1152.44 kN (vertikal)
+
+Erstelle Diagramme...
+Diagramm gespeichert: schnittgroessen.png
+
+
+Im Material ist Stahl S355 angegen, wieso wird dieser Stahl gewählt für die Brücke (siehe maturaarbeit.pdf)
+
+Argumentarium Stahl:
+
+Die Wahl von Stahl S355 für die Brücke basiert auf der Maturaarbeit (S. 22) und hat folgende Gründe: 1. Technische Eigenschaften:
+Streckgrenze f_yk = 355 MPa - hohe Festigkeit für schlanke Konstruktionen
+E-Modul = 210'000 MPa - gute Steifigkeit
+Dichte ρ = 7'900 kg/m³ (Maturaarbeit S. 18)
+2. Vorteile für Brückenbau:
+Gutes Festigkeits-/Gewichtsverhältnis - wichtig bei grossen Spannweiten (bis 40m)
+Gute Schweissbarkeit - essenziell für den geschweissten Trapez-Hohlkasten
+Duktil - verformt sich vor dem Bruch (Sicherheit)
+3. Normkonformität:
+Standardstahl nach EN 10025-2 (europäische Norm)
+Alle Bemessungswerte in Eurocode 3 definiert
+Teilsicherheitsbeiwert γ_M0 = 1.0 (SIA/Eurocode)
+4. Wirtschaftlichkeit:
+Weit verbreitet und kostengünstig
+Standardmaterial im Schweizer Brückenbau
+Höhere Festigkeit als S235 → weniger Materialeinsatz
+Alternative wäre S235 (niedrigere Festigkeit, günstiger), aber bei einer 175m langen Velobrücke mit Spannweiten bis 40m ist S355 die wirtschaftlichere Wahl, da der Querschnitt kleiner dimensioniert werden kann.
+
+
+Schubmodul:
+
+Das Schubmodul G (auch Gleitmodul) ist über die Poissonzahl ν mit dem E-Modul verknüpft: $$G = \frac{E}{2 \cdot (1 + \nu)}$$ Für Stahl:
+E = 210'000 MPa
+ν = 0.3 (Poissonzahl/Querdehnzahl für Stahl)
+$$G = \frac{210'000}{2 \cdot (1 + 0.3)} = \frac{210'000}{2.6} \approx 80'769 \text{ MPa} \approx 81'000 \text{ MPa}$$ Physikalische Bedeutung:
+Das Schubmodul beschreibt den Widerstand gegen Schubverformung (Gleitung)
+Verhältnis von Schubspannung τ zu Gleitwinkel γ: $G = \tau / \gamma$
+Im Code (materials.py:21):
+G: float = 81_000.0  # MPa (≈ E / 2.6)
+Der Kommentar "E / 2.6" ist die vereinfachte Form von E / (2·(1+0.3)) = E / 2.6. Verwendung in der Simulation: Das Schubmodul wird in analysis.py:44 für das PyNite-Materialmodell benötigt, da es für die Berechnung von Schubverformungen und Torsion relevant ist.
