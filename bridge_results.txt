@@ -33,8 +33,8 @@ Querschnitt (Stahl-Trapez-Hohlkasten):
 
   Fläche A:         1.1600 m²
   Trägheitsmoment I:12.6562 m⁴
-  Widerstandsmoment:15.1875 m³ -> TODO: plausibilisieren
-  Schubfläche A_V:  0.3970 m² -> TODO: plausibilisieren
+  Widerstandsmoment:15.1875 m³
+  Schubfläche A_V:  0.3970 m²
 ============================================================
 [2/5] Materialien laden...
 ============================================================
@@ -43,7 +43,7 @@ MATERIALEIGENSCHAFTEN
 
 Stahl S355 (Überbau):
   E-Modul:          210,000 MPa
-  Schubmodul G:     81,000 MPa.  --> TODO: überprüfen ob Claude stimmt (siehe unten)
+  Schubmodul G:     81,000 MPa. 
   Streckgrenze f_yk:355 MPa
   Bemessungswert f_yd: 355 MPa
   Dichte:           7,900 kg/m³
@@ -62,8 +62,8 @@ Beton C30/37 (Pfeiler/Widerlager):
 LASTDEFINITIONEN
 ============================================================
 
---- Ständige Lasten (Kapitel 3.1.2) ---
-  Eigengewicht:     14.98 kN/m².  ->  ---> 7.06, ist aber mit dem alten Querfläche gerechnet, musss in der Matuararbeit noch aktualisert werden
+--- Ständige Lasten (Kapitel 3.1.2) 
+  Eigengewicht:     14.98 kN/m².  ->  
                     89.90 kN/m (Streckenlast)
   Belag:            0.25 kN/m²
   Gesamt ständig:   91.40 kN/m
@@ -348,39 +348,3 @@ AUFLAGERKRÄFTE:
 
 Erstelle Diagramme...
 Diagramm gespeichert: schnittgroessen.png
-
-
-Im Material ist Stahl S355 angegen, wieso wird dieser Stahl gewählt für die Brücke (siehe maturaarbeit.pdf)
-
-Argumentarium Stahl:
-
-Die Wahl von Stahl S355 für die Brücke basiert auf der Maturaarbeit (S. 22) und hat folgende Gründe: 1. Technische Eigenschaften:
-Streckgrenze f_yk = 355 MPa - hohe Festigkeit für schlanke Konstruktionen
-E-Modul = 210'000 MPa - gute Steifigkeit
-Dichte ρ = 7'900 kg/m³ (Maturaarbeit S. 18)
-2. Vorteile für Brückenbau:
-Gutes Festigkeits-/Gewichtsverhältnis - wichtig bei grossen Spannweiten (bis 40m)
-Gute Schweissbarkeit - essenziell für den geschweissten Trapez-Hohlkasten
-Duktil - verformt sich vor dem Bruch (Sicherheit)
-3. Normkonformität:
-Standardstahl nach EN 10025-2 (europäische Norm)
-Alle Bemessungswerte in Eurocode 3 definiert
-Teilsicherheitsbeiwert γ_M0 = 1.0 (SIA/Eurocode)
-4. Wirtschaftlichkeit:
-Weit verbreitet und kostengünstig
-Standardmaterial im Schweizer Brückenbau
-Höhere Festigkeit als S235 → weniger Materialeinsatz
-Alternative wäre S235 (niedrigere Festigkeit, günstiger), aber bei einer 175m langen Velobrücke mit Spannweiten bis 40m ist S355 die wirtschaftlichere Wahl, da der Querschnitt kleiner dimensioniert werden kann.
-
-
-Schubmodul:
-
-Das Schubmodul G (auch Gleitmodul) ist über die Poissonzahl ν mit dem E-Modul verknüpft: $$G = \frac{E}{2 \cdot (1 + \nu)}$$ Für Stahl:
-E = 210'000 MPa
-ν = 0.3 (Poissonzahl/Querdehnzahl für Stahl)
-$$G = \frac{210'000}{2 \cdot (1 + 0.3)} = \frac{210'000}{2.6} \approx 80'769 \text{ MPa} \approx 81'000 \text{ MPa}$$ Physikalische Bedeutung:
-Das Schubmodul beschreibt den Widerstand gegen Schubverformung (Gleitung)
-Verhältnis von Schubspannung τ zu Gleitwinkel γ: $G = \tau / \gamma$
-Im Code (materials.py:21):
-G: float = 81_000.0  # MPa (≈ E / 2.6)
-Der Kommentar "E / 2.6" ist die vereinfachte Form von E / (2·(1+0.3)) = E / 2.6. Verwendung in der Simulation: Das Schubmodul wird in analysis.py:44 für das PyNite-Materialmodell benötigt, da es für die Berechnung von Schubverformungen und Torsion relevant ist.
